@@ -1,0 +1,6 @@
+../Middlewares/Third_Party/AL94_USB_Composite/COMPOSITE/App/usbd_cdc_acm_if.c:284:15:CDC_Init	16	static
+../Middlewares/Third_Party/AL94_USB_Composite/COMPOSITE/App/usbd_cdc_acm_if.c:307:15:CDC_DeInit	16	static
+../Middlewares/Third_Party/AL94_USB_Composite/COMPOSITE/App/usbd_cdc_acm_if.c:327:15:CDC_Control	16	static
+../Middlewares/Third_Party/AL94_USB_Composite/COMPOSITE/App/usbd_cdc_acm_if.c:420:15:CDC_Receive	24	static
+../Middlewares/Third_Party/AL94_USB_Composite/COMPOSITE/App/usbd_cdc_acm_if.c:449:15:CDC_TransmitCplt	24	static
+../Middlewares/Third_Party/AL94_USB_Composite/COMPOSITE/App/usbd_cdc_acm_if.c:465:9:CDC_Transmit	24	static

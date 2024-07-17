@@ -1,0 +1,6 @@
+../Core/Src/slider.c:9:6:slider_scan_start	4	static
+../Core/Src/slider.c:14:6:slider_scan_stop	4	static
+../Core/Src/slider.c:19:6:slider_get_board_info	8	static
+../Core/Src/slider.c:24:6:slider_set_led	4	static
+../Core/Src/slider.c:29:6:slider_reset	4	static
+../Core/Src/slider.c:34:6:slider_scan	4	static
