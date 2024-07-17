@@ -192,7 +192,9 @@ void StartDefaultTask(void *argument)
 void StartTask02(void *argument)
 {
   /* USER CODE BEGIN StartTask02 */
-	osDelay(1000);
+	while(1){
+		osDelay(1);
+	}
 
   /* USER CODE END StartTask02 */
 }
@@ -243,6 +245,7 @@ void StartTask03(void *argument)
 					break;
 			}
     	}
+		rxLen0 = 0;
 	  }
 	if (rxLen1 != 0){
 		//mailed
@@ -352,8 +355,11 @@ void StartTask04(void *argument)
 //	    //�?????启DMA传输刷灯
 //		HAL_TIM_PWM_Start_DMA(&htim2, TIM_CHANNEL_1, (uint32_t *)RGB_data_DMA_buffer, 970);
 //		HAL_TIM_PWM_Start_DMA(&htim2, TIM_CHANNEL_3, (uint32_t *)RGB_Air_DMA_buffer, 592);
-		osDelay(50);
+//		osDelay(50);
 //	  }
+	while(1){
+		osDelay(1);
+	}
   /* USER CODE END StartTask04 */
 }
 
