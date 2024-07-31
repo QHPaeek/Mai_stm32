@@ -23,6 +23,7 @@
 #include "usbd_cdc_acm_if.h"
 
 /* USER CODE BEGIN INCLUDE */
+//#include "usart.h"
 #include "serial.h"
 /* USER CODE END INCLUDE */
 
@@ -434,9 +435,7 @@ static int8_t CDC_Receive(uint8_t cdc_ch, uint8_t *Buf, uint32_t *Len)
 	USBD_CDC_SetRxBuffer(cdc_ch, &hUsbDevice, &Buf[0]);
 	USBD_CDC_ReceivePacket(cdc_ch, &hUsbDevice);
   return (USBD_OK);
-  /* USER CODE END 6 */
 }
-
 /**
   * @brief  CDC_TransmitCplt_FS
   *         Data transmited callback
@@ -538,7 +537,6 @@ uint8_t CDC_Transmit(uint8_t ch, uint8_t *Buf, uint16_t Len)
 //  /* Start another reception: provide the buffer pointer with offset and the buffer size */
 //  HAL_UART_Receive_IT(huart, (TX_Buffer[cdc_ch] + Write_Index[cdc_ch]), 1);
 //}
-
 /* USER CODE END PRIVATE_FUNCTIONS_IMPLEMENTATION */
 
 /**

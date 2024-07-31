@@ -54,7 +54,9 @@
 /* USER CODE BEGIN Variables */
 	//volatile unsigned long  ulHighFrequencyTimerTicks = 0ul;
 	extern USBD_HandleTypeDef hUsbDevice;
-	uint8_t touch_scan_flag = 0;
+	volatile uint8_t touch_scan_flag = 0;
+	uint8_t touch_cmd_flag = 0;
+	char cmd_tmp[6] = "(RSET)";
 /* USER CODE END Variables */
 /* Definitions for defaultTask */
 osThreadId_t defaultTaskHandle;
@@ -165,18 +167,20 @@ void StartDefaultTask(void *argument)
 	{
 		osDelay(5);
 		key_scan();
-		char cmd_touch[9] = "(0000000)";
-		for(uint8_t j = 0;j<8;j++){
+		uint8_t cmd_touch[9] = {0x28,0,0,0,0,0,0,0,0x29};
+		for(uint8_t j = 0;j<7;j++){
 			for(uint8_t i = 0;i<5;i++){
-				if(key_status[key_sheet[i+j*5]] > key_threshold){
-					cmd_touch[8-j] = cmd_touch[8-j] | (1 << (5-i));
-				}else{
-					cmd_touch[8-j] = cmd_touch[8-j] & ~(1 << (5-i));
+				if(key_status[key_sheet[i+j*5]] > 10){
+					cmd_touch[7-j] = cmd_touch[7-j] | (1 << (5-i));
 				}
 			}
 		}
-		if(touch_scan_flag){
-			CDC_Transmit(0, cmd_touch, 9);
+		if(touch_cmd_flag == 1){
+			CDC_Transmit(0,(uint8_t*)cmd_tmp, 6);
+			touch_cmd_flag = 0;
+		}
+		else if(touch_scan_flag == 1){
+			CDC_Transmit(0,(uint8_t*)cmd_touch, 9);
 		}
 	}
   /* USER CODE END StartDefaultTask */
@@ -214,32 +218,56 @@ void StartTask03(void *argument)
 //	uint8_t led_flag_len = 0;
   for(;;)
   {
-	osDelay(5);
+	osDelay(1);
 	if (rxLen0 != 0){
 		//maitouch
 		if(rxBuffer0[0] == 0x7B){
-			char cmd_tmp[6] = "(RSET)";
 			switch (rxBuffer0[1]){
 				case 0x53:
 					//{STAT}
 					touch_scan_flag = 1;
+					//cmd_tmp = "(STAT)";
+					//CDC_Transmit(0,(uint8_t*)cmd_tmp,6);
+					break;
 				case 0x48:
 					//{HALT}
 					touch_scan_flag = 0;
+					break;
 				case 0x52:
+					touch_scan_flag = 0;
+					touch_cmd_flag = 1;
 					if(rxBuffer0[3] == 0x45){
 						//{RSET}
-						CDC_Transmit(0,cmd_tmp,6);
+						//CDC_Transmit(0,(uint8_t*)cmd_tmp,6);
+						break;
 					}else if(rxBuffer0[3] == 0x72){
 						//Set Touch Panel Ratio
 						//todo
 						memcpy(cmd_tmp+1,rxBuffer0+1,4);
-						CDC_Transmit(0,cmd_tmp,6);
+						break;
 					}else if(rxBuffer0[3] == 0x6b){
 						//Set Touch Panel Sensitivity
 						//todo
 						memcpy(cmd_tmp+1,rxBuffer0+1,4);
-						CDC_Transmit(0,cmd_tmp,6);
+						break;
+					}
+				case 0x4c:
+					touch_scan_flag = 0;
+					touch_cmd_flag = 1;
+					if(rxBuffer0[3] == 0x45){
+						//{RSET}
+						//CDC_Transmit(0,(uint8_t*)cmd_tmp,6);
+						break;
+					}else if(rxBuffer0[3] == 0x72){
+						//Set Touch Panel Ratio
+						//todo
+						memcpy(cmd_tmp+1,rxBuffer0+1,4);
+						break;
+					}else if(rxBuffer0[3] == 0x6b){
+						//Set Touch Panel Sensitivity
+						//todo
+						memcpy(cmd_tmp+1,rxBuffer0+1,4);
+						break;
 					}
 				default:
 					break;
@@ -267,8 +295,8 @@ void StartTask03(void *argument)
 void StartTask04(void *argument)
 {
   /* USER CODE BEGIN StartTask04 */
-	//pwm计数�?????120重载，设置为120即一直低电平，设置为90表示ws2812的高，设置为30表示ws2812的低
-	//ws2812传输数据顺序要求是GRB,游戏下发数据为RGB,�?????要对调顺�?????
+	//pwm计数�??????120重载，设置为120即一直低电平，设置为90表示ws2812的高，设置为30表示ws2812的低
+	//ws2812传输数据顺序要求是GRB,游戏下发数据为RGB,�??????要对调顺�??????
 //	RGB_data_DMA_buffer[969] = 120;
 //	RGB_Air_DMA_buffer[591] = 120;
 //	for(;;){
@@ -276,7 +304,7 @@ void StartTask04(void *argument)
 //			system_status = 0;
 //			slider_scan_flag = 0;
 //			Air_scan_flag = 0;
-//			//减到0：没有接到指令，说明游戏已经�?出，切换到模�?0
+//			//减到0：没有接到指令，说明游戏已经�??出，切换到模�??0
 //		}else{
 //			led_count--;
 //		}
@@ -352,7 +380,7 @@ void StartTask04(void *argument)
 //	    		}
 //	    	}
 //	    }
-//	    //�?????启DMA传输刷灯
+//	    //�??????启DMA传输刷灯
 //		HAL_TIM_PWM_Start_DMA(&htim2, TIM_CHANNEL_1, (uint32_t *)RGB_data_DMA_buffer, 970);
 //		HAL_TIM_PWM_Start_DMA(&htim2, TIM_CHANNEL_3, (uint32_t *)RGB_Air_DMA_buffer, 592);
 //		osDelay(50);

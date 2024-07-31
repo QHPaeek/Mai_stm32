@@ -6,9 +6,9 @@
 
 1.将\`Release\F411_Mai.bin`使用STM32CubeProgrammer通过USB_DFU模式或者STlink刷入设备中。
 
-2.重新插拔设备，将弹出的USB串行设备分配为COM1
+2.重新插拔设备，按说明分配COM口序号
 
-3.编辑Segatool.ini使其停止Hook串口。
+3.编辑mai2.ini使其停止Hook串口。(DummyTouchPanel=1)
 
 4.直接启动游戏。ENJOY！
 
@@ -24,27 +24,7 @@
 
 灯光与按键当前版本未实现
 
-插上设备可能分辨不出哪个是触摸，因此请使用zadig替换驱动：
-
-![](C:\Users\XM\AppData\Roaming\marktext\images\2024-07-17-17-43-05-image.png)
-
-首先点击option - list all device
-
-![](C:\Users\XM\AppData\Roaming\marktext\images\2024-07-17-17-43-54-image.png)
-
-STM32 CDC ACM0(Interface 0)即为触摸串口。同理，2为灯光，4为按键。
-
-选中 ACM0：
-
-![](C:\Users\XM\AppData\Roaming\marktext\images\2024-07-17-17-45-08-image.png)
-
-将驱动替换为USB Serial(CDC)
-
-![](C:\Users\XM\AppData\Roaming\marktext\images\2024-07-17-17-47-01-image.png)
-
-在设备管理器里就可以看见设备名称了。
-
-**关于硬件：**
+插上设备之后默认出现3路串口，在没有修改过串口序号的情况下，COM数字最小的那一个是触摸，居中的是灯光，最大的是按键IO。
 
 本设计的硬件尚未完善，目前只是能运行的DEMO版本。后续将持续不断更新
 
