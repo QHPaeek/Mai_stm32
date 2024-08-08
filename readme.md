@@ -26,6 +26,8 @@
 
 插上设备之后默认出现3路串口，在没有修改过串口序号的情况下，COM数字最小的那一个是触摸，居中的是灯光，最大的是按键IO。
 
+串口按键IO请见[Affine_IO]([GitHub - QHPaeek/Affine_IO: 一个串口直通io，并入了串口JVS操作](https://github.com/QHPaeek/Affine_IO))
+
 **关于硬件：**
 
 本设计的硬件尚未完善，目前只是能运行的DEMO版本。后续将持续不断更新
