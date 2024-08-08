@@ -47,8 +47,8 @@ Core/Src/freertos.o: ../Core/Src/freertos.c \
  ../Middlewares/Third_Party/AL94_USB_Composite/COMPOSITE/Core/Inc/usbd_def.h \
  ../Middlewares/Third_Party/AL94_USB_Composite/COMPOSITE/Target/usbd_conf.h \
  ../Core/Inc/cy8cmbr3116.h ../Core/Inc/i2c.h ../Core/Inc/serial.h \
- ../Core/Inc/dma.h ../Core/Inc/tim.h ../Core/Inc/LED.h ../Core/Inc/dma.h \
- ../Core/Inc/tim.h \
+ ../Core/Inc/button.h ../Core/Inc/dma.h ../Core/Inc/tim.h \
+ ../Core/Inc/LED.h ../Core/Inc/dma.h ../Core/Inc/tim.h \
  ../Middlewares/Third_Party/AL94_USB_Composite/COMPOSITE/App/usbd_cdc_acm_if.h \
  ../Middlewares/Third_Party/AL94_USB_Composite/COMPOSITE/Class/CDC_ACM/Inc/usbd_cdc_acm.h \
  ../Middlewares/Third_Party/AL94_USB_Composite/COMPOSITE/Core/Inc/usbd_ioreq.h \
@@ -109,6 +109,7 @@ Core/Src/freertos.o: ../Core/Src/freertos.c \
 ../Core/Inc/cy8cmbr3116.h:
 ../Core/Inc/i2c.h:
 ../Core/Inc/serial.h:
+../Core/Inc/button.h:
 ../Core/Inc/dma.h:
 ../Core/Inc/tim.h:
 ../Core/Inc/LED.h:

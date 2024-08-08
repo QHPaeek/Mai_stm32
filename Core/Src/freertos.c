@@ -29,6 +29,7 @@
 #include "usb_device.h"
 #include "cy8cmbr3116.h"
 #include "serial.h"
+#include "button.h"
 #include "dma.h"
 #include "tim.h"
 #include "LED.h"
@@ -55,8 +56,15 @@
 	//volatile unsigned long  ulHighFrequencyTimerTicks = 0ul;
 	extern USBD_HandleTypeDef hUsbDevice;
 	volatile uint8_t touch_scan_flag = 0;
+	volatile uint8_t key_scan_flag = 0;
 	uint8_t touch_cmd_flag = 0;
+	uint8_t led_fade_target[2]; //0:start 1:end
+	uint8_t led_fade_buff[3];
+	uint8_t led_fade_flag = 0;
+	uint16_t led_fade_time;
+	uint8_t led_refresh_flag = 0;
 	char cmd_tmp[6] = "(RSET)";
+	char cmd_rst[6] = "(RSET)";
 /* USER CODE END Variables */
 /* Definitions for defaultTask */
 osThreadId_t defaultTaskHandle;
@@ -158,11 +166,12 @@ void MX_FREERTOS_Init(void) {
 void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN StartDefaultTask */
-  /* Infinite loop */
+  //mai_touch
 	osDelay(8);
-	Sensor_Cfg(&hi2c1);
-	Sensor_Cfg(&hi2c2);
-	Sensor_Cfg(&hi2c3);
+//	Sensor_Cfg(&hi2c1);
+//	Sensor_Cfg(&hi2c2);
+//	Sensor_Cfg(&hi2c3);
+	memset(key_threshold,128,35);
 	while(1)
 	{
 		osDelay(5);
@@ -170,7 +179,7 @@ void StartDefaultTask(void *argument)
 		uint8_t cmd_touch[9] = {0x28,0,0,0,0,0,0,0,0x29};
 		for(uint8_t j = 0;j<7;j++){
 			for(uint8_t i = 0;i<5;i++){
-				if(key_status[key_sheet[i+j*5]] > 10){
+				if(key_status[key_sheet[i+j*5]] > key_threshold[i+j*5]){
 					cmd_touch[7-j] = cmd_touch[7-j] | (1 << (5-i));
 				}
 			}
@@ -196,8 +205,13 @@ void StartDefaultTask(void *argument)
 void StartTask02(void *argument)
 {
   /* USER CODE BEGIN StartTask02 */
+	//mai_key
 	while(1){
-		osDelay(1);
+		osDelay(5);
+		uint8_t key_cmd[6] = {0xff,0x01,0x02,0x00,0x00,0x00};
+		key_cmd[3] = button_scan();
+		key_cmd[5] = 0x01+0x02+key_cmd[3]+key_cmd[4]; // checksum
+		CDC_Transmit(2,key_cmd, 6);
 	}
 
   /* USER CODE END StartTask02 */
@@ -216,72 +230,158 @@ void StartTask03(void *argument)
   /* Infinite loop */
 //	uint8_t led_flag = 0;
 //	uint8_t led_flag_len = 0;
+	uint8_t mai_led_default_response[8] = {0xe0,0x01,0x11,0x03,0x01,0x31,0x01,0x48};
+	uint8_t mai_led_eeprom_response[9] = {0xe0,0x01 ,0x11,0x04,0x01,0x7c,0x01,0x00,0x94};
+	uint8_t mai_led_boardinfo_response[18] = {0xe0,0x01,0x11,0x0d,0x01,0xf0,0x01,0x31,0x35,0x30,0x37,0x30,0x2d,0x30,0x34,0xff,0x90,0x2e};
+	uint8_t mai_led_boardstatus_response[12] = {0xe0,0x01,0x11,0x07,0x01,0xf1,0x01,00,00,00,00,0x0c};
+	uint8_t mai_led_protocolversion_response[11] = {0xe0,0x01,0x11,0x06,0x01,0xf3,0x01,0x01,0x00,0x00,0x0e};
   for(;;)
   {
 	osDelay(1);
 	if (rxLen0 != 0){
 		//maitouch
-		if(rxBuffer0[0] == 0x7B){
-			switch (rxBuffer0[1]){
-				case 0x53:
-					//{STAT}
-					touch_scan_flag = 1;
-					//cmd_tmp = "(STAT)";
-					//CDC_Transmit(0,(uint8_t*)cmd_tmp,6);
-					break;
-				case 0x48:
-					//{HALT}
-					touch_scan_flag = 0;
-					break;
-				case 0x52:
-					touch_scan_flag = 0;
-					touch_cmd_flag = 1;
-					if(rxBuffer0[3] == 0x45){
-						//{RSET}
+			if(rxBuffer0[0] == 0x7B){
+				switch (rxBuffer0[1]){
+					case 0x53:
+						//{STAT}
+						touch_scan_flag = 1;
+						//cmd_tmp = "(STAT)";
 						//CDC_Transmit(0,(uint8_t*)cmd_tmp,6);
 						break;
-					}else if(rxBuffer0[3] == 0x72){
-						//Set Touch Panel Ratio
-						//todo
-						memcpy(cmd_tmp+1,rxBuffer0+1,4);
+					case 0x48:
+						//{HALT}
+						touch_scan_flag = 0;
 						break;
-					}else if(rxBuffer0[3] == 0x6b){
-						//Set Touch Panel Sensitivity
-						//todo
-						memcpy(cmd_tmp+1,rxBuffer0+1,4);
+					case 0x52:
+						touch_scan_flag = 0;
+						touch_cmd_flag = 1;
+						if(rxBuffer0[3] == 0x45){
+							//{RSET}
+							memcpy(cmd_tmp+1,cmd_rst+1,4);
+							break;
+						}else if(rxBuffer0[3] == 0x72){
+							//Set Touch Panel Ratio
+							//TODO
+							memcpy(cmd_tmp+1,rxBuffer0+1,4);
+							break;
+						}else if(rxBuffer0[3] == 0x6b){
+							//Set Touch Panel Sensitivity
+							key_threshold[rxBuffer0[2] - 0x41] = rxBuffer0[4] + 40;
+							memcpy(cmd_tmp+1,rxBuffer0+1,4);
+							break;
+						}
+					case 0x4c:
+						touch_scan_flag = 0;
+						touch_cmd_flag = 1;
+						if(rxBuffer0[3] == 0x45){
+							//{RSET}
+							//CDC_Transmit(0,(uint8_t*)cmd_tmp,6);
+							break;
+						}else if(rxBuffer0[3] == 0x72){
+							//Set Touch Panel Ratio
+							//TODO
+							memcpy(cmd_tmp+1,rxBuffer0+1,4);
+							break;
+						}else if(rxBuffer0[3] == 0x6b){
+							//Set Touch Panel Sensitivity
+							key_threshold[rxBuffer0[2] - 0x41] = rxBuffer0[4] + 40;
+							memcpy(cmd_tmp+1,rxBuffer0+1,4);
+							break;
+						}
+					default:
 						break;
-					}
-				case 0x4c:
-					touch_scan_flag = 0;
-					touch_cmd_flag = 1;
-					if(rxBuffer0[3] == 0x45){
-						//{RSET}
-						//CDC_Transmit(0,(uint8_t*)cmd_tmp,6);
-						break;
-					}else if(rxBuffer0[3] == 0x72){
-						//Set Touch Panel Ratio
-						//todo
-						memcpy(cmd_tmp+1,rxBuffer0+1,4);
-						break;
-					}else if(rxBuffer0[3] == 0x6b){
-						//Set Touch Panel Sensitivity
-						//todo
-						memcpy(cmd_tmp+1,rxBuffer0+1,4);
-						break;
-					}
-				default:
-					break;
+				}
 			}
-    	}
-		rxLen0 = 0;
-	  }
-	if (rxLen1 != 0){
-		//mailed
-	  }
-	if (rxLen2 != 0){
+			rxLen0 = 0;
+		}
+		if (rxLen1 != 0){
+			//mailed
+			if(rxBuffer1[0] == 0xE0){
+				switch(rxBuffer1[4]){
+					case 0x31:
+						//setLedGs8Bit
+						LED_set(2*rxBuffer1[5],rxBuffer1[6],rxBuffer1[7],rxBuffer1[8]);
+						LED_set(2*rxBuffer1[5]+1,rxBuffer1[6],rxBuffer1[7],rxBuffer1[8]);
+						mai_led_default_response[5] = 0x31;
+						mai_led_default_response[6] = 0x48;
+						CDC_Transmit(1,mai_led_default_response,8);
+						break;
+					case 0x32:
+						//setLedGs8BitMulti
+						for(uint8_t i = rxBuffer1[5];i < rxBuffer1[6];i++){
+							LED_set(2*i,rxBuffer1[6],rxBuffer1[7],rxBuffer1[8]);
+							LED_set(2*i+1,rxBuffer1[6],rxBuffer1[7],rxBuffer1[8]);
+						}
+						mai_led_default_response[5] = 0x32;
+						mai_led_default_response[6] = 0x49;
+						CDC_Transmit(1,mai_led_default_response,8);
+						break;
+					case 0x33:
+						//setLedGs8BitMultiFade4
+						memcpy(led_fade_target,rxBuffer1 + 5,2);
+						memcpy(led_fade_buff,rxBuffer1 + 8,3);
+						led_fade_flag = 1;
+						led_fade_time = 4095/rxBuffer1[9]*8;
+						mai_led_default_response[5] = 0x33;
+						mai_led_default_response[6] = 0x4a;
+						CDC_Transmit(1,mai_led_default_response,8);
+						break;
+					case 0x39:
+						//setLedFet
+						//BodyLed ExtLed SideLed
+						__HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_2,rxBuffer1[5]);
+						__HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_1,rxBuffer1[6]);
+						__HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_2,rxBuffer1[7]);
+						mai_led_default_response[5] = 0x39;
+						mai_led_default_response[6] = 0x50;
+						CDC_Transmit(1,mai_led_default_response,8);
+						break;
+					case 0x3c:
+						//SetLedGsUpdate
+						led_refresh_flag = 1;
+						mai_led_default_response[5] = 0x3c;
+						mai_led_default_response[6] = 0x53;
+						CDC_Transmit(1,mai_led_default_response,8);
+						break;
+					case 0x7c:
+						//GetEEPRom
+						CDC_Transmit(1,mai_led_eeprom_response,9);
+						break;
+					case 0xf0:
+						//getBoardInfo
+						CDC_Transmit(1,mai_led_boardinfo_response,18);
+						break;
+					case 0xf1:
+						//getBoardStatus
+						CDC_Transmit(1,mai_led_boardstatus_response,12);
+						break;
+					case 0xf3:
+						//getProtocolVersion
+						CDC_Transmit(1,mai_led_protocolversion_response,11);
+						break;
+				}
+			}
+			rxLen1 = 0;
+		}
+		if (rxLen2 != 0){
 		//maikey
-	  }
-	}
+			if(rxBuffer2[0] == 0xFF){
+				switch(rxBuffer2[1]){
+					case 0x03:
+						//SERIAL_CMD_AUTO_SCAN_START
+						key_scan_flag = 1;
+						break;
+					case 0x04:
+						//SERIAL_CMD_AUTO_SCAN_STOP
+						key_scan_flag = 0;
+						break;
+					default:
+						break;
+				}
+			}
+			rxLen2 = 0;
+		}
+  }
   /* USER CODE END StartTask03 */
 }
 
@@ -295,99 +395,38 @@ void StartTask03(void *argument)
 void StartTask04(void *argument)
 {
   /* USER CODE BEGIN StartTask04 */
-	//pwm计数�??????120重载，设置为120即一直低电平，设置为90表示ws2812的高，设置为30表示ws2812的低
-	//ws2812传输数据顺序要求是GRB,游戏下发数据为RGB,�??????要对调顺�??????
-//	RGB_data_DMA_buffer[969] = 120;
-//	RGB_Air_DMA_buffer[591] = 120;
-//	for(;;){
-//		if(led_count == 0){
-//			system_status = 0;
-//			slider_scan_flag = 0;
-//			Air_scan_flag = 0;
-//			//减到0：没有接到指令，说明游戏已经�??出，切换到模�??0
-//		}else{
-//			led_count--;
-//		}
-//		if(system_status == 0){
-//			for(uint8_t i = 0 ;i<31;i++)
-//		    {
-//		    	for(uint8_t j = 0 ;j <8;j++)
-//		    	{
-//		    		RGB_data_DMA_buffer[(i*3)*8+j+224] = 30;
-//		    	}
-//		    	for(uint8_t j = 0 ;j <8;j++)
-//		    	{
-//		    		RGB_data_DMA_buffer[(i*3+1)*8+j+224] = 30;
-//		    	}
-//		    	for(uint8_t j = 0 ;j <8;j++)
-//		    	{
-//		    		RGB_data_DMA_buffer[(i*3+2)*8+j+224] = 90;
-//		    	}
-//		    }
-//			for(uint8_t i = 0 ;i<16;i++)
-//		    {
-//		    	for(uint8_t j = 0 ;j <8;j++)
-//		    	{
-//		    		RGB_data_DMA_buffer[(i*6+1)*8+j+224] = ((key_status[key_sheet[2*i]] > 128)|(key_status[key_sheet[2*i+1]] > 128)) ? 90:30;
-//		    	}
-//		    }
-//
-//		}else{
-//			for(uint8_t i = 0 ;i<31;i++)
-//		    {
-//		    	for(uint8_t j = 0 ;j <8;j++)
-//		    	{
-//		    		RGB_data_DMA_buffer[(i*3)*8+j+224] = (RGB_data_raw[4+i*3+2] & (1<<j)) ? 90:30;
-//		    	}
-//		    	for(uint8_t j = 0 ;j <8;j++)
-//		    	{
-//		    		RGB_data_DMA_buffer[(i*3+1)*8+j+224] = (RGB_data_raw[4+i*3+1] & (1<<j)) ? 90:30;
-//		    	}
-//		    	for(uint8_t j = 0 ;j <8;j++)
-//		    	{
-//		    		RGB_data_DMA_buffer[(i*3+2)*8+j+224] = (RGB_data_raw[4+i*3] & (1<<j)) ? 90:30;
-//		    	}
-//		    }
-//		}
-//	    for(uint8_t i = 0 ;i<6;i++)
-//	    {
-//	    	if(Air_key_buffer & (1<<i)){
-//	    		for(uint8_t j = 0 ;j <8;j++)
-//	    		{
-//	    			RGB_Air_DMA_buffer[(i*3)*8+j+224] = 90;
-//	    		}
-//	    		for(uint8_t j = 0 ;j <8;j++)
-//	    		{
-//	    			RGB_Air_DMA_buffer[(i*3+1)*8+j+224] =90;
-//	    		}
-//	    		for(uint8_t j = 0 ;j <8;j++)
-//	    		{
-//	    			RGB_Air_DMA_buffer[(i*3+2)*8+j+224] =90;
-//	    		}
-//	    	}
-//	    	else{
-//	    		for(uint8_t j = 0 ;j <8;j++)
-//	    		{
-//	    			RGB_Air_DMA_buffer[(i*3)*8+j+224] = 30;
-//	    		}
-//	    		for(uint8_t j = 0 ;j <8;j++)
-//	    		{
-//	    			RGB_Air_DMA_buffer[(i*3+1)*8+j+224] =30;
-//	    		}
-//	    		for(uint8_t j = 0 ;j <8;j++)
-//	    		{
-//	    			RGB_Air_DMA_buffer[(i*3+2)*8+j+224] =90;
-//	    		}
-//	    	}
-//	    }
-//	    //�??????启DMA传输刷灯
-//		HAL_TIM_PWM_Start_DMA(&htim2, TIM_CHANNEL_1, (uint32_t *)RGB_data_DMA_buffer, 970);
-//		HAL_TIM_PWM_Start_DMA(&htim2, TIM_CHANNEL_3, (uint32_t *)RGB_Air_DMA_buffer, 592);
-//		osDelay(50);
-//	  }
+	uint8_t red,green,blue;
+	__HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_2,0);
+	__HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_1,0);
+	__HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_2,0);
+	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_2);
+	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_1);
+	HAL_TIM_PWM_Start(&htim3,TIM_CHANNEL_2);
 	while(1){
-		osDelay(1);
+		if(led_fade_flag){
+			if(led_fade_time <= 10){
+				red = led_fade_buff[0];
+				green = led_fade_buff[1];
+				blue = led_fade_buff[2];
+				led_fade_flag = 0;
+			}else{
+				red = RGB_data_raw[led_fade_target[0] * 3] + (led_fade_buff[0] - RGB_data_raw[led_fade_target[0] * 3])/(led_fade_time / 10);
+				green = RGB_data_raw[led_fade_target[0] * 3 + 1] + (led_fade_buff[1] - RGB_data_raw[led_fade_target[0] * 3 + 1])/(led_fade_time / 10);
+				blue = RGB_data_raw[led_fade_target[0] * 3 + 2] + (led_fade_buff[2] - RGB_data_raw[led_fade_target[0] * 3 + 2])/(led_fade_time / 10);
+				led_fade_time -= 10;
+			}
+			for(uint8_t i = led_fade_target[0];i < led_fade_target[1];i++){
+				LED_set(2*i,red,green,blue);
+				LED_set(2*i+1,red,green,blue);
+			}
+			LED_refresh();
+		}else if(led_refresh_flag){
+			led_refresh_flag = 0;
+			LED_refresh();
+		}
+		osDelay(10);
 	}
+
   /* USER CODE END StartTask04 */
 }
 

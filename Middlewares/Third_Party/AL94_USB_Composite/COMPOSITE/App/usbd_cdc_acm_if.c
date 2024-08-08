@@ -24,7 +24,7 @@
 
 /* USER CODE BEGIN INCLUDE */
 //#include "usart.h"
-#include "serial.h"
+//#include "tim.h"
 /* USER CODE END INCLUDE */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -421,21 +421,15 @@ static int8_t CDC_Control(uint8_t cdc_ch, uint8_t cmd, uint8_t *pbuf, uint16_t l
 static int8_t CDC_Receive(uint8_t cdc_ch, uint8_t *Buf, uint32_t *Len)
 {
   /* USER CODE BEGIN 6 */
-	switch(cdc_ch){
-		case 0:
-			memcpy(rxBuffer0,Buf,*Len);
-			rxLen0 = *Len;
-		case 1:
-			memcpy(rxBuffer1,Buf,*Len);
-			rxLen1 = *Len;
-		case 2:
-			memcpy(rxBuffer2,Buf,*Len);
-			rxLen2 = *Len;
-	}
-	USBD_CDC_SetRxBuffer(cdc_ch, &hUsbDevice, &Buf[0]);
-	USBD_CDC_ReceivePacket(cdc_ch, &hUsbDevice);
+  //HAL_UART_Transmit_DMA(CDC_CH_To_UART_Handle(cdc_ch), Buf, *Len);
+  CDC_Transmit(cdc_ch, Buf, *Len); // echo back on same channel
+
+  USBD_CDC_SetRxBuffer(cdc_ch, &hUsbDevice, &Buf[0]);
+  USBD_CDC_ReceivePacket(cdc_ch, &hUsbDevice);
   return (USBD_OK);
+  /* USER CODE END 6 */
 }
+
 /**
   * @brief  CDC_TransmitCplt_FS
   *         Data transmited callback

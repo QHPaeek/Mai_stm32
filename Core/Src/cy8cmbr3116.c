@@ -13,7 +13,7 @@ uint8_t key_sheet[48]={
 24,25,26,27,28,29,30,31, //E1-E8
 34,35,36,37,38,39,40,41,42,43,44,45,46,47//占位
 };
-uint8_t key_threshold = 128;
+uint8_t key_threshold[35] = {0};
 uint8_t mem_temp = 0;
 uint8_t CRC_data[2] = {0XA9,0X66}; //当前版本CY8CMBR3116配置的CRC校验值，已经提前算好
 

@@ -8,7 +8,7 @@ extern uint8_t key_status[48];
 extern uint8_t KEY_ADDR[16];
 extern unsigned char CY8CMBR3116_configuration[128];
 extern uint8_t key_sheet[48];
-extern uint8_t key_threshold;
+extern uint8_t key_threshold[35];
 
 #define SENSOR_ADDR 0x6E
 #define CONFIG_CRC 0X7E

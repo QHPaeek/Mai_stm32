@@ -1,5 +1,5 @@
-../Core/Src/freertos.c:197:6:StartTask02	8	static
-../Core/Src/freertos.c:214:6:StartTask03	8	static
-../Core/Src/freertos.c:158:6:StartDefaultTask	48	static
-../Core/Src/freertos.c:296:6:StartTask04	8	static
-../Core/Src/freertos.c:107:6:MX_FREERTOS_Init	8	static
+../Core/Src/freertos.c:166:6:StartDefaultTask	56	static
+../Core/Src/freertos.c:205:6:StartTask02	16	static
+../Core/Src/freertos.c:227:6:StartTask03	104	static
+../Core/Src/freertos.c:395:6:StartTask04	40	static
+../Core/Src/freertos.c:115:6:MX_FREERTOS_Init	8	static
