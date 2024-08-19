@@ -168,9 +168,9 @@ void StartDefaultTask(void *argument)
   /* USER CODE BEGIN StartDefaultTask */
   //mai_touch
 	osDelay(8);
-//	Sensor_Cfg(&hi2c1);
-//	Sensor_Cfg(&hi2c2);
-//	Sensor_Cfg(&hi2c3);
+	Sensor_Cfg(&hi2c1);
+	Sensor_Cfg(&hi2c2);
+	Sensor_Cfg(&hi2c3);
 	memset(key_threshold,128,35);
 	while(1)
 	{
@@ -179,8 +179,12 @@ void StartDefaultTask(void *argument)
 		uint8_t cmd_touch[9] = {0x28,0,0,0,0,0,0,0,0x29};
 		for(uint8_t j = 0;j<7;j++){
 			for(uint8_t i = 0;i<5;i++){
+				if(j == 7 && i == 4){
+					break;
+					//没有�??35个触摸点
+				}
 				if(key_status[key_sheet[i+j*5]] > key_threshold[i+j*5]){
-					cmd_touch[7-j] = cmd_touch[7-j] | (1 << (5-i));
+					cmd_touch[j+1] = cmd_touch[7-j] | (1 << i);
 				}
 			}
 		}
@@ -191,6 +195,7 @@ void StartDefaultTask(void *argument)
 		else if(touch_scan_flag == 1){
 			CDC_Transmit(0,(uint8_t*)cmd_touch, 9);
 		}
+
 	}
   /* USER CODE END StartDefaultTask */
 }
@@ -304,7 +309,7 @@ void StartTask03(void *argument)
 						LED_set(2*rxBuffer1[5]+1,rxBuffer1[6],rxBuffer1[7],rxBuffer1[8]);
 						mai_led_default_response[5] = 0x31;
 						mai_led_default_response[6] = 0x48;
-						CDC_Transmit(1,mai_led_default_response,8);
+						while(CDC_Transmit(1,mai_led_default_response,8) != USBD_OK);
 						break;
 					case 0x32:
 						//setLedGs8BitMulti
@@ -314,7 +319,7 @@ void StartTask03(void *argument)
 						}
 						mai_led_default_response[5] = 0x32;
 						mai_led_default_response[6] = 0x49;
-						CDC_Transmit(1,mai_led_default_response,8);
+						while(CDC_Transmit(1,mai_led_default_response,8) != USBD_OK);
 						break;
 					case 0x33:
 						//setLedGs8BitMultiFade4
@@ -324,7 +329,7 @@ void StartTask03(void *argument)
 						led_fade_time = 4095/rxBuffer1[9]*8;
 						mai_led_default_response[5] = 0x33;
 						mai_led_default_response[6] = 0x4a;
-						CDC_Transmit(1,mai_led_default_response,8);
+						while(CDC_Transmit(1,mai_led_default_response,8) != USBD_OK);
 						break;
 					case 0x39:
 						//setLedFet
@@ -334,30 +339,30 @@ void StartTask03(void *argument)
 						__HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_2,rxBuffer1[7]);
 						mai_led_default_response[5] = 0x39;
 						mai_led_default_response[6] = 0x50;
-						CDC_Transmit(1,mai_led_default_response,8);
+						while(CDC_Transmit(1,mai_led_default_response,8) != USBD_OK);
 						break;
 					case 0x3c:
 						//SetLedGsUpdate
 						led_refresh_flag = 1;
 						mai_led_default_response[5] = 0x3c;
 						mai_led_default_response[6] = 0x53;
-						CDC_Transmit(1,mai_led_default_response,8);
+						while(CDC_Transmit(1,mai_led_default_response,8) != USBD_OK);
 						break;
 					case 0x7c:
 						//GetEEPRom
-						CDC_Transmit(1,mai_led_eeprom_response,9);
+						while(CDC_Transmit(1,mai_led_eeprom_response,9) != USBD_OK);
 						break;
 					case 0xf0:
 						//getBoardInfo
-						CDC_Transmit(1,mai_led_boardinfo_response,18);
+						while(CDC_Transmit(1,mai_led_boardinfo_response,18) != USBD_OK);
 						break;
 					case 0xf1:
 						//getBoardStatus
-						CDC_Transmit(1,mai_led_boardstatus_response,12);
+						while(CDC_Transmit(1,mai_led_boardstatus_response,12) != USBD_OK);
 						break;
 					case 0xf3:
 						//getProtocolVersion
-						CDC_Transmit(1,mai_led_protocolversion_response,11);
+						while(CDC_Transmit(1,mai_led_protocolversion_response,11) != USBD_OK);
 						break;
 				}
 			}

@@ -5,13 +5,13 @@
 uint8_t key_status[48] = {0};
 uint8_t KEY_ADDR[16] = {0xba,0xbc,0xbe,0xc0,0xc2,0xc4,0xc6,0xc8,0xca,0xcc,0xce,0xd0,0xd2,0xd4,0xd6,0xd8};
 uint8_t key_sheet[48]={
-//针对CY8CMBR3116模块实际传感通道与游戏内按键序号的对应表。数组顺序是A1-E8对应游戏内按键，数组数值对应key_status[32]的序号。
-0,1,2,3,4,5,6,7,8, //A1-A8
-9,10,11,12,13,14,15, //B1-B8
-32,33, //C1-C2
-16,17,18,19,20,21,22,23, //D1-D8
-24,25,26,27,28,29,30,31, //E1-E8
-34,35,36,37,38,39,40,41,42,43,44,45,46,47//占位
+//针对CY8CMBR3116模块实际传感通道与游戏内按键序号的对应表。数组顺序是A1-E8对应游戏内按键，数组数值对应key_status[32]的序号(即MBR3116的实际通道，接在I2C1上的是0~15.I2C2为16~31以此类推)。
+46,40,18,29,23,2,12,6, //A1-A8
+47,41,36,30,24,20,13,7, //B1-B8
+37,14, //C1-C2
+4,44,38,30,25,21,15,8, //D1-D8
+5,45,39,19,28,22,3,9, //E1-E8
+0,0,0,0,0,0,0,0,0,0,0,0,0,0//占位
 };
 uint8_t key_threshold[35] = {0};
 uint8_t mem_temp = 0;
@@ -40,21 +40,21 @@ void key_scan()
 {
 	for(uint8_t i = 0;i<16;i++)
 	{
-		if(HAL_I2C_Mem_Read(&hi2c1,SENSOR_ADDR,KEY_ADDR[i],I2C_MEMADD_SIZE_8BIT,&mem_temp,1,100)== HAL_OK)
+		if(HAL_I2C_Mem_Read(&hi2c1,SENSOR_ADDR,KEY_ADDR[i],I2C_MEMADD_SIZE_8BIT,&mem_temp,1,5)== HAL_OK)
 		{
 			key_status[i] = mem_temp;
 		}
 	}
 	for(uint8_t i = 0;i<16;i++)
 	{
-		if(HAL_I2C_Mem_Read(&hi2c2,SENSOR_ADDR,KEY_ADDR[i],I2C_MEMADD_SIZE_8BIT,&mem_temp,1,100)==HAL_OK)
+		if(HAL_I2C_Mem_Read(&hi2c2,SENSOR_ADDR,KEY_ADDR[i],I2C_MEMADD_SIZE_8BIT,&mem_temp,1,5)==HAL_OK)
 		{
 			key_status[i+16] = mem_temp;
 		}
 	}
 	for(uint8_t i = 0;i<16;i++)
 	{
-		if(HAL_I2C_Mem_Read(&hi2c3,SENSOR_ADDR,KEY_ADDR[i],I2C_MEMADD_SIZE_8BIT,&mem_temp,1,100)== HAL_OK)
+		if(HAL_I2C_Mem_Read(&hi2c3,SENSOR_ADDR,KEY_ADDR[i],I2C_MEMADD_SIZE_8BIT,&mem_temp,1,5)== HAL_OK)
 		{
 			key_status[i+32] = mem_temp;
 		}

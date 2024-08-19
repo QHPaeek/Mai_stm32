@@ -2163,6 +2163,8 @@ void USBD_Update_CDC_ACM_DESC(uint8_t *desc,
                               uint8_t out_ep,
                               uint8_t str_idx)
 {
+	//in_ep = 0x80U;
+	cmd_ep = 0x88U;
   desc += 9;
   for (uint8_t i = 0; i < NUMBER_OF_CDC; i++)
   {
@@ -2185,8 +2187,8 @@ void USBD_Update_CDC_ACM_DESC(uint8_t *desc,
     CDC_COM_ITF_NBR[i] = com_itf;
     CDC_STR_DESC_IDX[i] = str_idx;
 
-    in_ep += 2;
-    cmd_ep = in_ep + 1;
+    in_ep += 1;
+    cmd_ep += 1;
     out_ep++;
     str_idx++;
 
