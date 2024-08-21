@@ -63,6 +63,7 @@
 	uint8_t led_fade_flag = 0;
 	uint16_t led_fade_time;
 	uint8_t led_refresh_flag = 0;
+	uint8_t heart_beat = 255;
 	char cmd_tmp[6] = "(RSET)";
 	char cmd_rst[6] = "(RSET)";
 /* USER CODE END Variables */
@@ -171,7 +172,10 @@ void StartDefaultTask(void *argument)
 	Sensor_Cfg(&hi2c1);
 	Sensor_Cfg(&hi2c2);
 	Sensor_Cfg(&hi2c3);
-	memset(key_threshold,128,35);
+	Sensor_softRST(&hi2c1);
+	Sensor_softRST(&hi2c2);
+	Sensor_softRST(&hi2c3);
+	memset(key_threshold,64,35);
 	while(1)
 	{
 		osDelay(5);
@@ -181,7 +185,7 @@ void StartDefaultTask(void *argument)
 			for(uint8_t i = 0;i<5;i++){
 				if(j == 7 && i == 4){
 					break;
-					//没有�??35个触摸点
+					//没有�???35个触摸点
 				}
 				if(key_status[key_sheet[i+j*5]] > key_threshold[i+j*5]){
 					cmd_touch[j+1] = cmd_touch[7-j] | (1 << i);
@@ -214,7 +218,7 @@ void StartTask02(void *argument)
 	while(1){
 		osDelay(5);
 		uint8_t key_cmd[6] = {0xff,0x01,0x02,0x00,0x00,0x00};
-		key_cmd[3] = button_scan();
+		button_scan(&key_cmd[3]);
 		key_cmd[5] = 0x01+0x02+key_cmd[3]+key_cmd[4]; // checksum
 		CDC_Transmit(2,key_cmd, 6);
 	}
@@ -314,8 +318,8 @@ void StartTask03(void *argument)
 					case 0x32:
 						//setLedGs8BitMulti
 						for(uint8_t i = rxBuffer1[5];i < rxBuffer1[6];i++){
-							LED_set(2*i,rxBuffer1[6],rxBuffer1[7],rxBuffer1[8]);
-							LED_set(2*i+1,rxBuffer1[6],rxBuffer1[7],rxBuffer1[8]);
+							LED_set(2*i,rxBuffer1[8],rxBuffer1[9],rxBuffer1[10]);
+							LED_set(2*i+1,rxBuffer1[8],rxBuffer1[9],rxBuffer1[10]);
 						}
 						mai_led_default_response[5] = 0x32;
 						mai_led_default_response[6] = 0x49;
@@ -380,6 +384,10 @@ void StartTask03(void *argument)
 						//SERIAL_CMD_AUTO_SCAN_STOP
 						key_scan_flag = 0;
 						break;
+					case 0x11:
+						//SERIAL_CMD_HEART_BEAT
+						heart_beat = 255;
+						break;
 					default:
 						break;
 				}
@@ -407,6 +415,27 @@ void StartTask04(void *argument)
 	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_2);
 	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_1);
 	HAL_TIM_PWM_Start(&htim3,TIM_CHANNEL_2);
+//	memset(RGB_data_raw,128,48);
+//	LED_refresh();
+//	osDelay(1000);
+//	for(uint8_t i=0;i<8;i++){
+//		LED_set(2*i,255,0,0);
+//		LED_set(2*i+1,255,0,0);
+//		LED_refresh();
+//		osDelay(1000);
+//	}
+//	for(uint8_t i=0;i<8;i++){
+//		LED_set(2*i,0,255,0);
+//		LED_set(2*i+1,0,255,0);
+//		LED_refresh();
+//		osDelay(1000);
+//	}
+//	for(uint8_t i=0;i<8;i++){
+//		LED_set(2*i,0,0,255);
+//		LED_set(2*i+1,0,0,255);
+//		LED_refresh();
+//		osDelay(1000);
+//	}
 	while(1){
 		if(led_fade_flag){
 			if(led_fade_time <= 10){
@@ -428,6 +457,14 @@ void StartTask04(void *argument)
 		}else if(led_refresh_flag){
 			led_refresh_flag = 0;
 			LED_refresh();
+		}
+		if(heart_beat == 0){
+			for(uint8_t j=0;j<16;j++){
+				LED_set(j,0,0,0);
+			}
+			LED_refresh();
+		}else{
+			heart_beat --;
 		}
 		osDelay(10);
 	}

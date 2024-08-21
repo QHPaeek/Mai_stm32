@@ -27,7 +27,6 @@
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
-DMA_HandleTypeDef hdma_tim2_ch3_up;
 DMA_HandleTypeDef hdma_tim2_ch1;
 
 /* TIM2 init function */
@@ -179,27 +178,6 @@ void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef* tim_pwmHandle)
     __HAL_RCC_TIM2_CLK_ENABLE();
 
     /* TIM2 DMA Init */
-    /* TIM2_CH3_UP Init */
-    hdma_tim2_ch3_up.Instance = DMA1_Stream1;
-    hdma_tim2_ch3_up.Init.Channel = DMA_CHANNEL_3;
-    hdma_tim2_ch3_up.Init.Direction = DMA_MEMORY_TO_PERIPH;
-    hdma_tim2_ch3_up.Init.PeriphInc = DMA_PINC_DISABLE;
-    hdma_tim2_ch3_up.Init.MemInc = DMA_MINC_ENABLE;
-    hdma_tim2_ch3_up.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
-    hdma_tim2_ch3_up.Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
-    hdma_tim2_ch3_up.Init.Mode = DMA_NORMAL;
-    hdma_tim2_ch3_up.Init.Priority = DMA_PRIORITY_LOW;
-    hdma_tim2_ch3_up.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
-    if (HAL_DMA_Init(&hdma_tim2_ch3_up) != HAL_OK)
-    {
-      Error_Handler();
-    }
-
-    /* Several peripheral DMA handle pointers point to the same DMA handle.
-     Be aware that there is only one stream to perform all the requested DMAs. */
-    __HAL_LINKDMA(tim_pwmHandle,hdma[TIM_DMA_ID_CC3],hdma_tim2_ch3_up);
-    __HAL_LINKDMA(tim_pwmHandle,hdma[TIM_DMA_ID_UPDATE],hdma_tim2_ch3_up);
-
     /* TIM2_CH1 Init */
     hdma_tim2_ch1.Instance = DMA1_Stream5;
     hdma_tim2_ch1.Init.Channel = DMA_CHANNEL_3;
@@ -327,8 +305,6 @@ void HAL_TIM_PWM_MspDeInit(TIM_HandleTypeDef* tim_pwmHandle)
     __HAL_RCC_TIM2_CLK_DISABLE();
 
     /* TIM2 DMA DeInit */
-    HAL_DMA_DeInit(tim_pwmHandle->hdma[TIM_DMA_ID_CC3]);
-    HAL_DMA_DeInit(tim_pwmHandle->hdma[TIM_DMA_ID_UPDATE]);
     HAL_DMA_DeInit(tim_pwmHandle->hdma[TIM_DMA_ID_CC1]);
   /* USER CODE BEGIN TIM2_MspDeInit 1 */
 

@@ -10,5 +10,5 @@
 
 #include "main.h"
 
-uint8_t button_scan();
+uint8_t button_scan(uint8_t* key_tmp);
 #endif /* INC_BUTTON_H_ */

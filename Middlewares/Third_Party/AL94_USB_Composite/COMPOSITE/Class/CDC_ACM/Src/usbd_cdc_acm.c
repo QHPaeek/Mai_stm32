@@ -2163,7 +2163,7 @@ void USBD_Update_CDC_ACM_DESC(uint8_t *desc,
                               uint8_t out_ep,
                               uint8_t str_idx)
 {
-	//in_ep = 0x80U;
+	in_ep = 0x81U;
 	cmd_ep = 0x88U;
   desc += 9;
   for (uint8_t i = 0; i < NUMBER_OF_CDC; i++)

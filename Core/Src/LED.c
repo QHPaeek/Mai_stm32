@@ -2,7 +2,7 @@
 #include "stdio.h"
 
 #define NUM_LED 16
-uint8_t RGB_data_raw[48] = {0}; //16LED
+uint8_t RGB_data_raw[48] = {0xff}; //16LED
 uint32_t RGB_data_DMA_buffer[609] = {120};
 
 const uint8_t gamma8[256] = {
@@ -51,6 +51,6 @@ void LED_refresh()
 			RGB_data_DMA_buffer[(i*3+2)*8+j+224] = (gamma8[RGB_data_raw[i*3+2]] & (1<<j)) ? 90:30;
 		}
 	}
-	HAL_TIM_PWM_Start_DMA(&htim2, TIM_CHANNEL_1, (uint32_t *)RGB_data_DMA_buffer, sizeof(RGB_data_DMA_buffer));
+	HAL_TIM_PWM_Start_DMA(&htim2, TIM_CHANNEL_1, (uint32_t *)RGB_data_DMA_buffer, 609);
 }
 

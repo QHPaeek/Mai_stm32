@@ -40,21 +40,21 @@ void key_scan()
 {
 	for(uint8_t i = 0;i<16;i++)
 	{
-		if(HAL_I2C_Mem_Read(&hi2c1,SENSOR_ADDR,KEY_ADDR[i],I2C_MEMADD_SIZE_8BIT,&mem_temp,1,5)== HAL_OK)
+		if(HAL_I2C_Mem_Read(&hi2c1,SENSOR_ADDR,KEY_ADDR[i],I2C_MEMADD_SIZE_8BIT,&mem_temp,1,100)== HAL_OK)
 		{
 			key_status[i] = mem_temp;
 		}
 	}
 	for(uint8_t i = 0;i<16;i++)
 	{
-		if(HAL_I2C_Mem_Read(&hi2c2,SENSOR_ADDR,KEY_ADDR[i],I2C_MEMADD_SIZE_8BIT,&mem_temp,1,5)==HAL_OK)
+		if(HAL_I2C_Mem_Read(&hi2c2,SENSOR_ADDR,KEY_ADDR[i],I2C_MEMADD_SIZE_8BIT,&mem_temp,1,100)==HAL_OK)
 		{
 			key_status[i+16] = mem_temp;
 		}
 	}
 	for(uint8_t i = 0;i<16;i++)
 	{
-		if(HAL_I2C_Mem_Read(&hi2c3,SENSOR_ADDR,KEY_ADDR[i],I2C_MEMADD_SIZE_8BIT,&mem_temp,1,5)== HAL_OK)
+		if(HAL_I2C_Mem_Read(&hi2c3,SENSOR_ADDR,KEY_ADDR[i],I2C_MEMADD_SIZE_8BIT,&mem_temp,1,100)== HAL_OK)
 		{
 			key_status[i+32] = mem_temp;
 		}
