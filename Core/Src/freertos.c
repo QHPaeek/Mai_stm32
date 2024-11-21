@@ -183,12 +183,12 @@ void StartDefaultTask(void *argument)
 		uint8_t cmd_touch[9] = {0x28,0,0,0,0,0,0,0,0x29};
 		for(uint8_t j = 0;j<7;j++){
 			for(uint8_t i = 0;i<5;i++){
-				if(j == 7 && i == 4){
+				if(j == 6 && i == 4){
 					break;
 					//没有�???35个触摸点
 				}
 				if(key_status[key_sheet[i+j*5]] > key_threshold[i+j*5]){
-					cmd_touch[j+1] = cmd_touch[7-j] | (1 << i);
+					cmd_touch[j + 1] |= (1 << i);
 				}
 			}
 		}
