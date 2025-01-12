@@ -1,4 +1,4 @@
-../Middlewares/Third_Party/FreeRTOS/Source/stream_buffer.c:1134:15:prvReadBytesFromBuffer	32	static,ignoring_inline_asm
+../Middlewares/Third_Party/FreeRTOS/Source/stream_buffer.c:1134:15:prvReadBytesFromBuffer	24	static,ignoring_inline_asm
 ../Middlewares/Third_Party/FreeRTOS/Source/stream_buffer.c:1088:15:prvWriteBytesToBuffer.part.0	24	static,ignoring_inline_asm
 ../Middlewares/Third_Party/FreeRTOS/Source/stream_buffer.c:219:23:xStreamBufferGenericCreate	24	static,ignoring_inline_asm
 ../Middlewares/Third_Party/FreeRTOS/Source/stream_buffer.c:283:23:xStreamBufferGenericCreateStatic	40	static,ignoring_inline_asm
@@ -8,7 +8,7 @@
 ../Middlewares/Third_Party/FreeRTOS/Source/stream_buffer.c:470:8:xStreamBufferSpacesAvailable	0	static,ignoring_inline_asm
 ../Middlewares/Third_Party/FreeRTOS/Source/stream_buffer.c:494:8:xStreamBufferBytesAvailable	0	static,ignoring_inline_asm
 ../Middlewares/Third_Party/FreeRTOS/Source/stream_buffer.c:506:8:xStreamBufferSend	56	static,ignoring_inline_asm
-../Middlewares/Third_Party/FreeRTOS/Source/stream_buffer.c:610:8:xStreamBufferSendFromISR	48	static,ignoring_inline_asm
+../Middlewares/Third_Party/FreeRTOS/Source/stream_buffer.c:610:8:xStreamBufferSendFromISR	40	static,ignoring_inline_asm
 ../Middlewares/Third_Party/FreeRTOS/Source/stream_buffer.c:713:8:xStreamBufferReceive	40	static,ignoring_inline_asm
 ../Middlewares/Third_Party/FreeRTOS/Source/stream_buffer.c:817:8:xStreamBufferNextMessageLengthBytes	24	static,ignoring_inline_asm
 ../Middlewares/Third_Party/FreeRTOS/Source/stream_buffer.c:861:8:xStreamBufferReceiveFromISR	48	static,ignoring_inline_asm

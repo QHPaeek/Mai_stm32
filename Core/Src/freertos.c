@@ -27,13 +27,13 @@
 /* USER CODE BEGIN Includes */
 #include "usb_otg.h"
 #include "usb_device.h"
-#include "cy8cmbr3116.h"
 #include "serial.h"
 #include "button.h"
 #include "dma.h"
 #include "tim.h"
 #include "LED.h"
 #include "usbd_cdc_acm_if.h"
+#include "capsense.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -56,7 +56,7 @@
 	//volatile unsigned long  ulHighFrequencyTimerTicks = 0ul;
 	extern USBD_HandleTypeDef hUsbDevice;
 	volatile uint8_t touch_scan_flag = 0;
-	volatile uint8_t key_scan_flag = 0;
+	volatile uint8_t key_scan_flag = 1;
 	uint8_t touch_cmd_flag = 0;
 	uint8_t led_fade_target[2]; //0:start 1:end
 	uint8_t led_fade_buff[3];
@@ -168,27 +168,25 @@ void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN StartDefaultTask */
   //mai_touch
-	osDelay(8);
-	Sensor_Cfg(&hi2c1);
-	Sensor_Cfg(&hi2c2);
-	Sensor_Cfg(&hi2c3);
-	Sensor_softRST(&hi2c1);
-	Sensor_softRST(&hi2c2);
-	Sensor_softRST(&hi2c3);
-	memset(key_threshold,64,35);
+	osDelay(500);
+	for(uint8_t i = 0;i<34;i++){
+		capsense_threshold[i] = 0x0300;
+	}
+	capsense_init();
+
 	while(1)
 	{
 		osDelay(5);
-		key_scan();
+		capsense_check();
 		uint8_t cmd_touch[9] = {0x28,0,0,0,0,0,0,0,0x29};
 		for(uint8_t j = 0;j<7;j++){
 			for(uint8_t i = 0;i<5;i++){
-				if(j == 7 && i == 4){
+				if(j == 6 && i == 4){
 					break;
-					//没有�???35个触摸点
+					//没有�?35个触摸点
 				}
-				if(key_status[key_sheet[i+j*5]] > key_threshold[i+j*5]){
-					cmd_touch[j+1] = cmd_touch[7-j] | (1 << i);
+				if(!capsense_touch_status[touch_sheet[i+j*5]]){
+					cmd_touch[j + 1] |= (1 << i);
 				}
 			}
 		}
@@ -217,10 +215,19 @@ void StartTask02(void *argument)
 	//mai_key
 	while(1){
 		osDelay(5);
-		uint8_t key_cmd[6] = {0xff,0x01,0x02,0x00,0x00,0x00};
-		button_scan(&key_cmd[3]);
-		key_cmd[5] = 0x01+0x02+key_cmd[3]+key_cmd[4]; // checksum
-		CDC_Transmit(2,key_cmd, 6);
+		if(key_scan_flag){
+			uint8_t key_cmd[6] = {0xff,0x01,0x02,0x00,0x00,0x00};
+			button_scan(&key_cmd[3]);
+			key_cmd[5] = 0x01+0x02+key_cmd[3]+key_cmd[4]; // checksum
+			CDC_Transmit(2,key_cmd, 6);
+		}else{
+			uint8_t key_cmd[38] = {0xff,0x02,34,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,35};
+			for(uint8_t i=0;i<32;i++){
+				//key_cmd[i+3] = key_status[key_sheet[i]];
+				key_cmd[37] += key_cmd[i+3];
+			}
+			CDC_Transmit(2,key_cmd, 38);
+		}
 	}
 
   /* USER CODE END StartTask02 */
@@ -246,7 +253,7 @@ void StartTask03(void *argument)
 	uint8_t mai_led_protocolversion_response[11] = {0xe0,0x01,0x11,0x06,0x01,0xf3,0x01,0x01,0x00,0x00,0x0e};
   for(;;)
   {
-	osDelay(1);
+	osDelay(5);
 	if (rxLen0 != 0){
 		//maitouch
 			if(rxBuffer0[0] == 0x7B){
@@ -275,7 +282,7 @@ void StartTask03(void *argument)
 							break;
 						}else if(rxBuffer0[3] == 0x6b){
 							//Set Touch Panel Sensitivity
-							key_threshold[rxBuffer0[2] - 0x41] = rxBuffer0[4] + 40;
+							//key_threshold[rxBuffer0[2] - 0x41] = rxBuffer0[4] + 40;
 							memcpy(cmd_tmp+1,rxBuffer0+1,4);
 							break;
 						}
@@ -293,7 +300,7 @@ void StartTask03(void *argument)
 							break;
 						}else if(rxBuffer0[3] == 0x6b){
 							//Set Touch Panel Sensitivity
-							key_threshold[rxBuffer0[2] - 0x41] = rxBuffer0[4] + 40;
+							//key_threshold[rxBuffer0[2] - 0x41] = rxBuffer0[4] + 40;
 							memcpy(cmd_tmp+1,rxBuffer0+1,4);
 							break;
 						}
@@ -377,16 +384,20 @@ void StartTask03(void *argument)
 			if(rxBuffer2[0] == 0xFF){
 				switch(rxBuffer2[1]){
 					case 0x03:
-						//SERIAL_CMD_AUTO_SCAN_START
-						key_scan_flag = 1;
+						//SERIAL_CMD_MANUAL_SCAN_START
+						key_scan_flag = 0;
 						break;
 					case 0x04:
-						//SERIAL_CMD_AUTO_SCAN_STOP
-						key_scan_flag = 0;
+						//SERIAL_CMD_MANUAL_SCAN_STOP
+						key_scan_flag = 1;
 						break;
 					case 0x11:
 						//SERIAL_CMD_HEART_BEAT
 						heart_beat = 255;
+						break;
+					case 0x05:
+						//SERIAL_CMD_CHANGE_TOUCH_THRESHOLD
+						//memcpy(&rxBuffer2[3],key_threshold,34);
 						break;
 					default:
 						break;

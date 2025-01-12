@@ -1,2 +1,2 @@
-LED.c:27:6:LED_set	2
-LED.c:35:6:LED_refresh	4
+../Core/Src/LED.c:27:6:LED_set	2
+../Core/Src/LED.c:35:6:LED_refresh	4

@@ -1,6 +1,7 @@
 #ifndef SLIDER_H
 #define SLIDER_H
 #include "stdio.h"
+#include <stdint.h>
 
 void slider_set_led();
 void slider_scan_start();

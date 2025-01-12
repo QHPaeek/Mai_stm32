@@ -2,7 +2,7 @@
 ../Middlewares/Third_Party/FreeRTOS/Source/queue.c:255:12:xQueueGenericReset	16	static,ignoring_inline_asm
 ../Middlewares/Third_Party/FreeRTOS/Source/queue.c:310:16:xQueueGenericCreateStatic	24	static,ignoring_inline_asm
 ../Middlewares/Third_Party/FreeRTOS/Source/queue.c:368:16:xQueueGenericCreate	24	static,ignoring_inline_asm
-../Middlewares/Third_Party/FreeRTOS/Source/queue.c:532:15:xQueueGetMutexHolder	16	static
+../Middlewares/Third_Party/FreeRTOS/Source/queue.c:532:15:xQueueGetMutexHolder	8	static
 ../Middlewares/Third_Party/FreeRTOS/Source/queue.c:563:15:xQueueGetMutexHolderFromISR	0	static,ignoring_inline_asm
 ../Middlewares/Third_Party/FreeRTOS/Source/queue.c:686:16:xQueueCreateCountingSemaphoreStatic	32	static,ignoring_inline_asm
 ../Middlewares/Third_Party/FreeRTOS/Source/queue.c:714:16:xQueueCreateCountingSemaphore	24	static,ignoring_inline_asm
@@ -18,8 +18,8 @@
 ../Middlewares/Third_Party/FreeRTOS/Source/queue.c:1636:12:xQueuePeek	48	static,ignoring_inline_asm
 ../Middlewares/Third_Party/FreeRTOS/Source/queue.c:1785:12:xQueueReceiveFromISR	32	static,ignoring_inline_asm
 ../Middlewares/Third_Party/FreeRTOS/Source/queue.c:1876:12:xQueuePeekFromISR	24	static,ignoring_inline_asm
-../Middlewares/Third_Party/FreeRTOS/Source/queue.c:1930:13:uxQueueMessagesWaiting	16	static,ignoring_inline_asm
-../Middlewares/Third_Party/FreeRTOS/Source/queue.c:1946:13:uxQueueSpacesAvailable	16	static,ignoring_inline_asm
+../Middlewares/Third_Party/FreeRTOS/Source/queue.c:1930:13:uxQueueMessagesWaiting	8	static,ignoring_inline_asm
+../Middlewares/Third_Party/FreeRTOS/Source/queue.c:1946:13:uxQueueSpacesAvailable	8	static,ignoring_inline_asm
 ../Middlewares/Third_Party/FreeRTOS/Source/queue.c:1963:13:uxQueueMessagesWaitingFromISR	0	static,ignoring_inline_asm
 ../Middlewares/Third_Party/FreeRTOS/Source/queue.c:1975:6:vQueueDelete	0	static,ignoring_inline_asm
 ../Middlewares/Third_Party/FreeRTOS/Source/queue.c:2019:14:uxQueueGetQueueNumber	0	static

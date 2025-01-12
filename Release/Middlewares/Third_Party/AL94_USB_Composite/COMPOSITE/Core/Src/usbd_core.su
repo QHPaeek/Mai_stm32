@@ -1,6 +1,6 @@
 ../Middlewares/Third_Party/AL94_USB_Composite/COMPOSITE/Core/Src/usbd_core.c:89:20:USBD_Init	0	static
 ../Middlewares/Third_Party/AL94_USB_Composite/COMPOSITE/Core/Src/usbd_core.c:129:20:USBD_DeInit	8	static
-../Middlewares/Third_Party/AL94_USB_Composite/COMPOSITE/Core/Src/usbd_core.c:163:20:USBD_RegisterClass	24	static
+../Middlewares/Third_Party/AL94_USB_Composite/COMPOSITE/Core/Src/usbd_core.c:163:20:USBD_RegisterClass	16	static
 ../Middlewares/Third_Party/AL94_USB_Composite/COMPOSITE/Core/Src/usbd_core.c:200:20:USBD_Start	0	static
 ../Middlewares/Third_Party/AL94_USB_Composite/COMPOSITE/Core/Src/usbd_core.c:212:20:USBD_Stop	8	static
 ../Middlewares/Third_Party/AL94_USB_Composite/COMPOSITE/Core/Src/usbd_core.c:232:20:USBD_RunTestMode	0	static
