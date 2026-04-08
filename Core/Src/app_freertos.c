@@ -448,6 +448,7 @@ void Touch_Task(void const * argument)
 	/* Infinite loop */
 	//mai_touch
 	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6, 0);
+	HAL_GPIO_WritePin(GPIOB,GPIO_PIN_3,1);
 	flash_read(Flash.raw_flash);
 	if(Flash.system_config != CONFIG_VERSION){
 		for(uint8_t i = 0;i<34;i++){
@@ -481,6 +482,7 @@ void Touch_Task(void const * argument)
 		osDelay(1);
 		benchmark_emit_pending_event();
 		if(!capsense_data_ready){
+			HAL_GPIO_WritePin(GPIOB,GPIO_PIN_3,1);
 			HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6, 0);
 		}else{
 			capsense_check();

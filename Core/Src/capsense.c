@@ -154,7 +154,7 @@ bool capsense_data_proc_legacy(uint8_t *uart_dma_buffer){
     return false;
 }
 void Boot_Buttom_IRQHandler(){
-	HAL_GPIO_WritePin(GPIOB,GPIO_PIN_3,1);
+	HAL_GPIO_WritePin(GPIOB,GPIO_PIN_3,0);
 	for(uint8_t i = 0;i<34;i++){
 		capsense_baseline[i] = 0;
 		capsense_freeze[i] = 0;
@@ -165,7 +165,7 @@ void Boot_Buttom_IRQHandler(){
 	for(uint8_t i = 0;i<8;i++){
 		capsense_duration[i] = 0;
 	}
-	HAL_GPIO_WritePin(GPIOB,GPIO_PIN_3,0);
+	HAL_GPIO_WritePin(GPIOB,GPIO_PIN_3,1);
 }
 
 void capsense_init(){
